@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 
+#include <iostream>
 #include <cstring>
 #include <string>
 #include <chrono>
@@ -530,17 +531,17 @@ namespace demo {
 	}
 
 	void loadMesh(
-		char* filename,
+		std::string const &filename,
 		std::vector<vec3>& positions,
 		std::vector<vec3>& normals,
 
 		std::vector<int>& cells
 	) {
-		FILE* file = fopen(filename, "r"); 
+		FILE* file = fopen(filename.c_str(), "r");
 
 		if (file == NULL) {
 
-			printf("could not open file %s\n", filename);
+			printf("could not open file %s\n", filename.c_str());
 		}
 
 		char line[256];
@@ -768,14 +769,15 @@ namespace demo {
 	}
 
 
-	void deformMesh() {
+	void deformMesh(std::string const &modelPath) {
 		std::vector<vec3> meshPositions;
 		std::vector<vec3> meshNormals;
 		std::vector<vec3> meshColors;
 		std::vector<int> meshCells; 
 		Adj adj;// vertex adjacency info.
 
-		loadMesh("../armadillo.ply", meshPositions, meshNormals, meshCells);
+		// 加载数据
+		loadMesh(modelPath, meshPositions, meshNormals, meshCells);
 		adj = getAdj((int)meshPositions.size(), meshCells);
 
 		std::vector<int> handles;
@@ -881,7 +883,7 @@ namespace demo {
 		}
 	}
 
-	void runDemo() {
+	void runDemo(std::string const &modelPath) {
 		InitGlfw();
 
 		shader = LoadNormalShader(
@@ -909,6 +911,8 @@ namespace demo {
 
 			"in vec3 fsColor;"
 
+			"out vec4 outColor;"
+
 			"uniform vec3 uEyePos;"
 
 			"void main()"
@@ -921,7 +925,7 @@ namespace demo {
 			"vec3 l = normalize(lp - fsPos);"
 			"vec3 v = normalize(uEyePos - fsPos);"
 			"vec3 lc = vec3(1.0);"
-			"gl_FragColor = vec4("
+			"outColor = vec4("
 			"0.5*color +"
 			"0.35*lc*clamp(dot(fsNormal, l), 0.0, 1.0)"
 			"+ 0.15*lc*pow(clamp(dot(normalize(l + v), fsNormal), 0.0, 1.0), 8.0)"
@@ -930,7 +934,7 @@ namespace demo {
 			"}"
 		);
 
-		deformMesh();  freeDeform();
+		deformMesh(modelPath);  freeDeform();
 
 		for (Mesh* mesh : meshes) {
 			mesh->UploadMesh();
@@ -952,5 +956,10 @@ namespace demo {
 }
 
 int main(int argc, char** argv) {
-	demo::runDemo();
+	if (argc != 2) {
+		std::cout << "usage: " << argv[0] << " MODEL_PATH" << std::endl;
+		return -1;
+	}
+
+	demo::runDemo(argv[1]);
 }

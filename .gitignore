@@ -1,3 +1,4 @@
 node_modules/
 *.mesh
 cpp/build/
+.log/
