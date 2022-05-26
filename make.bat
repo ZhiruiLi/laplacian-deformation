@@ -10,17 +10,22 @@ echo ./make.bat setup/build/run
 goto eof
 
 :setup
-npm install
+call npm install
 goto eof
 
 :build
-rem emsdk activate latest
+echo run the following commands first:
+echo    scoop install emscripten
+echo    emsdk install latest
+echo    emsdk activate latest
+echo start building ...
 cd cpp
-.\build.bat
+call build.bat
+echo done. To see result, run: .\make.bat run
 goto eof
 
 :run
-npm run start
+call npm run start
 goto eof
 
 :eof
