@@ -2,3 +2,6 @@ node_modules/
 *.mesh
 cpp/build/
 .log/
+build/
+cpp/.cache/
+cpp/compile_commands.json
